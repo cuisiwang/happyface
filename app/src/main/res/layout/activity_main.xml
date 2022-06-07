@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity"
+    android:id="@+id/activity_java"
+    android:clickable="false"
+    >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:clickable="false">
+        <ImageView
+            android:id="@+id/imageView"
+            android:layout_gravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:focusable="true" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:orientation="vertical"
+            >
+            <Button
+                android:id="@+id/select_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="选择图片" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_gravity="center"
+                >
+
+                <Button
+                    android:id="@+id/process_btn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="灰度化处理"
+                    />
+
+                <Button
+                    android:id="@+id/process_btn_blur"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="模糊处理" />
+
+                <Button
+                    android:id="@+id/Binarization"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="二值化" />
+
+                <Button
+                    android:id="@+id/process_btn_roi"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="处理ROI" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_gravity="center"
+                >
+
+                <Button
+                    android:id="@+id/canny"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="canny" />
+                <Button
+                    android:id="@+id/histogram"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="直方图" />
+                <Button
+                    android:id="@+id/histogram_equalization"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="直方图均衡" />
+
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/save_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="保存图片" />
+
+
+        </LinearLayout>
+    </LinearLayout>
+
+
+
+
+</ScrollView>
