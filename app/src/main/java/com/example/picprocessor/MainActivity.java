@@ -28,6 +28,8 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
@@ -50,7 +52,9 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -97,22 +101,23 @@ public class MainActivity extends AppCompatActivity {
 
         myImageView = (ImageView)findViewById(R.id.imageView);
         myImageView.setScaleType(ImageView.ScaleType.FIT_CENTER);//设置显示图片的属性。把图片按比例扩大/缩小到View的宽度，居中显示
-        Button selectImageBtn = (Button)findViewById(R.id.select_btn);//定义一个按钮来选择图片
-        selectImageBtn.setOnClickListener(new View.OnClickListener() {//定义选择图片的监听器
-            @Override
-            public void onClick(View v) {
-                // makeText(MainActivity.this.getApplicationContext(), "start to browser image", Toast.LENGTH_SHORT).show();
-                selectImage();//调用选择图片的函数
-            }
 
-            //从手机的相册中选择图片
-            private void selectImage() {
-                Intent intent = new Intent();
-                intent.setType("image/*");
-                intent.setAction(Intent.ACTION_GET_CONTENT);//允许用户选择特殊种类的数据，并返回（特殊种类的数据：照一张相片或录一段音）
-                startActivityForResult(Intent.createChooser(intent,"选择图像..."), PICK_IMAGE_REQUEST);//启动另外一个活动
+        Intent intent = new Intent();
+        intent.setType("image/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);//允许用户选择特殊种类的数据，并返回（特殊种类的数据：照一张相片或录一段音）
+        startActivityForResult(Intent.createChooser(intent,"选择图像..."), PICK_IMAGE_REQUEST);//启动另外一个活动
 
-            }
+        FloatingActionButton close =findViewById(R.id.close);//返回重新选按钮
+        close.setOnClickListener(view -> {
+            finish();
+        });
+
+
+        FloatingActionButton save=findViewById(R.id.save);//保存
+        save.setOnClickListener(view -> {
+            Bitmap bitmap = ((BitmapDrawable)myImageView.getDrawable()).getBitmap();
+            MediaStore.Images.Media.insertImage(getContentResolver(), bitmap, "HappyFace"+new SimpleDateFormat("yyyy-MM-dd").format(new Date(System.currentTimeMillis())),"");
+            Toast.makeText(this, "保存成功！", Toast.LENGTH_SHORT).show();
         });
 
         //定义处理的按钮
@@ -165,7 +170,7 @@ public class MainActivity extends AppCompatActivity {
                 Utils.bitmapToMat(selectbp, src);//将位图转换为Mat数据。而对于位图，其由A、R、G、B通道组成
                 Imgproc.cvtColor(src, temp, Imgproc.COLOR_BGRA2BGR);//转换为BGR（opencv中数据存储方式）
 
-                Imgproc.blur(temp,dst,new Size(11,11));
+                Imgproc.blur(temp,dst,new Size(20,20));//调整这个size数值就可以改变效果
                 Bitmap selectbp2 = Bitmap.createBitmap(src.width(), src.height(), Bitmap.Config.ARGB_8888) ;
                 Utils.matToBitmap(dst, selectbp2);//再将mat转换为位图
                 myImageView.setImageBitmap(selectbp2);//显示位图
@@ -194,7 +199,6 @@ public class MainActivity extends AppCompatActivity {
                 Imgproc.cvtColor(src, temp, Imgproc.COLOR_BGRA2BGR);//转换为BGR（opencv中数据存储方式）
                 Imgproc.cvtColor(temp, temp, Imgproc.COLOR_BGR2GRAY);//灰度化处理。
 
-//                Imgproc.adaptiveThreshold(temp,dst,255,Imgproc.ADAPTIVE_THRESH_MEAN_C,Imgproc.THRESH_BINARY,15,10);
                 Imgproc.threshold(temp,dst,50,255,Imgproc.THRESH_BINARY);
                 Bitmap selectbp2 = Bitmap.createBitmap(src.width(), src.height(), Bitmap.Config.ARGB_8888) ;
                 Utils.matToBitmap(dst, selectbp2);//再将mat转换为位图
@@ -394,33 +398,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        Button processBtn_save = (Button)findViewById(R.id.save_btn);
-        processBtn_save.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {//定义按钮监听器
-                if(flag==0){
-                    Toast.makeText(MainActivity.this, "请先选择一张图片！", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                save();//保存图片
-            }
-
-            //保存图片函数
-            private void save() {
-                Bitmap bitmap = ((BitmapDrawable)myImageView.getDrawable()).getBitmap();
-                saveImage(bitmap);
-            }
-
-
-            /**
-             * API 29及以下保存图片到相册的方法
-             *
-             * @param toBitmap 要保存的图片
-             */
-            private void saveImage(Bitmap toBitmap) {
-                String insertImage = MediaStore.Images.Media.insertImage(getContentResolver(), toBitmap, "壁纸", "picprocessor");
-            }
-        });
     }
 
 

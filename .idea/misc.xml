@@ -3,7 +3,9 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Users/Dath Chou/Desktop/picprocessor/app/src/main/res/drawable/add_photo.xml" value="0.254" />
         <entry key="..\:/Users/Dath Chou/Desktop/picprocessor/app/src/main/res/layout/activity_main.xml" value="0.23278985507246377" />
+        <entry key="..\:/Users/Dath Chou/Desktop/picprocessor/app/src/main/res/layout/activity_select_main.xml" value="0.26145833333333335" />
         <entry key="..\:/Users/Dath Chou/Desktop/picprocessor/app/src/main/res/layout/content_main.xml" value="0.23278985507246377" />
         <entry key="..\:/Users/Dath Chou/Desktop/picprocessor/app/src/main/res/layout/fragment_first.xml" value="0.23278985507246377" />
         <entry key="..\:/Users/Dath Chou/Desktop/picprocessor/app/src/main/res/layout/fragment_second.xml" value="0.23278985507246377" />
