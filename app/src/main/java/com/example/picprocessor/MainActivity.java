@@ -25,6 +25,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.SeekBar;
 import android.widget.Toast;
 
 
@@ -68,6 +69,7 @@ public class MainActivity extends AppCompatActivity {
     private Bitmap selectbp;//所选择的bitmap
     private int flag=0;
     private View.OnTouchListener listener;
+    private SeekBar SB;
 
     private float f_x=0,f_y=0;
     private float L_x=0,L_y=0;//裁剪图片所用四个坐标点
@@ -112,6 +114,7 @@ public class MainActivity extends AppCompatActivity {
             finish();
         });
 
+        SB=findViewById(R.id.SBar);//程度调节进度条
 
         FloatingActionButton save=findViewById(R.id.save);//保存
         save.setOnClickListener(view -> {
@@ -129,6 +132,7 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(MainActivity.this, "请先选择一张图片！", Toast.LENGTH_SHORT).show();
                     return;
                 }
+                SB.setVisibility(View.INVISIBLE);
                 convertGray();//灰度转换
             }
 
@@ -159,18 +163,37 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(MainActivity.this, "请先选择一张图片！", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                BlurProcess();//灰度转换
+                SB.setVisibility(View.VISIBLE);
+                SB.setMax(70);
+                SB.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                    @Override
+                    public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                        if(i==0) return;
+                        BlurProcess(i);//灰度转换
+                    }
+
+                    @Override
+                    public void onStartTrackingTouch(SeekBar seekBar) {
+
+                    }
+
+                    @Override
+                    public void onStopTrackingTouch(SeekBar seekBar) {
+
+                    }
+                });
+
             }
 
             //灰度转换函数
-            private void BlurProcess() {
+            private void BlurProcess(int degree) {
                 Mat src = new Mat();
                 Mat temp = new Mat();
                 Mat dst = new Mat();
                 Utils.bitmapToMat(selectbp, src);//将位图转换为Mat数据。而对于位图，其由A、R、G、B通道组成
                 Imgproc.cvtColor(src, temp, Imgproc.COLOR_BGRA2BGR);//转换为BGR（opencv中数据存储方式）
 
-                Imgproc.blur(temp,dst,new Size(20,20));//调整这个size数值就可以改变效果
+                Imgproc.blur(temp,dst,new Size(degree,degree));//调整这个size数值就可以改变效果
                 Bitmap selectbp2 = Bitmap.createBitmap(src.width(), src.height(), Bitmap.Config.ARGB_8888) ;
                 Utils.matToBitmap(dst, selectbp2);//再将mat转换为位图
                 myImageView.setImageBitmap(selectbp2);//显示位图
@@ -187,6 +210,7 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(MainActivity.this, "请先选择一张图片！", Toast.LENGTH_SHORT).show();
                     return;
                 }
+                SB.setVisibility(View.INVISIBLE);
                 BinarizationProcess();//二值化
             }
 
@@ -216,6 +240,7 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(MainActivity.this, "请先选择一张图片！", Toast.LENGTH_SHORT).show();
                     return;
                 }
+                SB.setVisibility(View.INVISIBLE);
                 cannyProcess();
             }
 
@@ -253,6 +278,7 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(MainActivity.this, "请先选择一张图片！", Toast.LENGTH_SHORT).show();
                     return;
                 }
+                SB.setVisibility(View.INVISIBLE);
                 histogramProcess();
             }
 
@@ -319,6 +345,7 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(MainActivity.this, "请先选择一张图片！", Toast.LENGTH_SHORT).show();
                     return;
                 }
+                SB.setVisibility(View.INVISIBLE);
                 histogram_equalization_Process();
             }
 
@@ -386,6 +413,7 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(MainActivity.this, "请先选择一张图片！", Toast.LENGTH_SHORT).show();
                     return;
                 }
+                SB.setVisibility(View.INVISIBLE);
                 if(lisenterEnable==1){
                     Toast.makeText(MainActivity.this, "图片裁剪已关闭", Toast.LENGTH_SHORT).show();
                     lisenterEnable=0;
