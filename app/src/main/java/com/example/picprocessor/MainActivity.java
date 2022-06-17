@@ -87,6 +87,10 @@ public class MainActivity extends AppCompatActivity {
     private Button satB;//亮度调节
     private Button hueB;//亮度调节
 
+    private Button xpB;//相片滤镜
+    private Button hjB;//怀旧滤镜
+    private Button qsB;//去色滤镜
+
     //相机权限获取
     private static String[] PERMISSIONS_STORAGE = {
             Manifest.permission.WRITE_EXTERNAL_STORAGE,//写权限
@@ -539,6 +543,21 @@ public class MainActivity extends AppCompatActivity {
             });
         });
 
+        xpB=findViewById(R.id.xiangpianB);
+        xpB.setOnClickListener(view -> {
+            //这里填图像颜色反转对应效果函数
+        });
+
+        qsB=findViewById(R.id.quseB);
+        qsB.setOnClickListener(view -> {
+            //这里填去色效果对应效果函数
+        });
+
+        hjB=findViewById(R.id.huaijiuB);
+        hjB.setOnClickListener(view -> {
+            //这里填怀旧效果对应效果函数
+        });
+
     }
 
 
@@ -651,6 +670,7 @@ public class MainActivity extends AppCompatActivity {
                 });
             } catch (Exception e) {
                 e.printStackTrace();
+                finish();
             }
         }else finish();
     }

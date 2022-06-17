@@ -115,9 +115,30 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="亮度调节" />
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_gravity="center"
+                >
+                <Button
+                    android:id="@+id/xiangpianB"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="相片滤镜" />
 
+                <Button
+                    android:id="@+id/huaijiuB"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="怀旧滤镜" />
 
-
+                <Button
+                    android:id="@+id/quseB"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="去色滤镜" />
             </LinearLayout>
 
         </LinearLayout>
