@@ -687,11 +687,16 @@ public class MainActivity extends AppCompatActivity {
         //思路是由绝对位置改为相对位置，再裁剪
         //****************************************************************************************
         Mat imgRectROI= new Mat(src, rect);      // 从原图中截取图片
-        selectbp.recycle();
+      /*  selectbp.recycle();
         selectbp = Bitmap.createBitmap(imgRectROI.width(), imgRectROI.height(), Bitmap.Config.ARGB_8888) ;
         //此处永久改变了原位图
         Utils.matToBitmap(imgRectROI, selectbp);//再将mat转换为位图
         myImageView.setImageBitmap(selectbp);//显示位图
+        */
+        Bitmap selectbp2 = Bitmap.createBitmap(imgRectROI.width(), imgRectROI.height(), Bitmap.Config.ARGB_8888) ;
+        Utils.matToBitmap(imgRectROI, selectbp2);//再将mat转换为位图
+        myImageView.setImageBitmap(selectbp2);//显示位图
+        //展示就先不永久改变原位图
         f_x=f_y=L_x=L_y=0;
     }
     private void startRequestPermission(){
