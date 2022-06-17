@@ -13,6 +13,10 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.ColorMatrix;
+import android.graphics.ColorMatrixColorFilter;
+import android.graphics.Paint;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Build;
@@ -63,8 +67,7 @@ import java.util.TimerTask;
 public class MainActivity extends AppCompatActivity {
 
 
-    private double max_size = 1024;
-    private int PICK_IMAGE_REQUEST = 1;
+    private final int PICK_IMAGE_REQUEST = 1;
     private ImageView myImageView;//通过ImageView来显示结果
     private Bitmap selectbp;//所选择的bitmap
     private int flag=0;
@@ -75,6 +78,14 @@ public class MainActivity extends AppCompatActivity {
     private float L_x=0,L_y=0;//裁剪图片所用四个坐标点
 
     private int lisenterEnable=0;
+
+    private ColorMatrix hueM =new ColorMatrix();
+    private ColorMatrix satM = new ColorMatrix();
+    private ColorMatrix lumM = new ColorMatrix();
+
+    private Button lumB;//亮度调节
+    private Button satB;//亮度调节
+    private Button hueB;//亮度调节
 
     //相机权限获取
     private static String[] PERMISSIONS_STORAGE = {
@@ -163,8 +174,11 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(MainActivity.this, "请先选择一张图片！", Toast.LENGTH_SHORT).show();
                     return;
                 }
+                SB.setOnSeekBarChangeListener(null);
+                myImageView.setImageBitmap(selectbp);
                 SB.setVisibility(View.VISIBLE);
-                SB.setMax(70);
+                SB.setMax(50);
+                SB.setProgress(0);
                 SB.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                     @Override
                     public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
@@ -186,14 +200,14 @@ public class MainActivity extends AppCompatActivity {
             }
 
             //灰度转换函数
-            private void BlurProcess(int degree) {
+            private void BlurProcess(int deg) {
                 Mat src = new Mat();
                 Mat temp = new Mat();
                 Mat dst = new Mat();
                 Utils.bitmapToMat(selectbp, src);//将位图转换为Mat数据。而对于位图，其由A、R、G、B通道组成
                 Imgproc.cvtColor(src, temp, Imgproc.COLOR_BGRA2BGR);//转换为BGR（opencv中数据存储方式）
 
-                Imgproc.blur(temp,dst,new Size(degree,degree));//调整这个size数值就可以改变效果
+                Imgproc.blur(temp,dst,new Size(deg,deg));//调整这个size数值就可以改变效果
                 Bitmap selectbp2 = Bitmap.createBitmap(src.width(), src.height(), Bitmap.Config.ARGB_8888) ;
                 Utils.matToBitmap(dst, selectbp2);//再将mat转换为位图
                 myImageView.setImageBitmap(selectbp2);//显示位图
@@ -414,6 +428,7 @@ public class MainActivity extends AppCompatActivity {
                     return;
                 }
                 SB.setVisibility(View.INVISIBLE);
+                myImageView.setImageBitmap(selectbp);
                 if(lisenterEnable==1){
                     Toast.makeText(MainActivity.this, "图片裁剪已关闭", Toast.LENGTH_SHORT).show();
                     lisenterEnable=0;
@@ -422,8 +437,106 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(MainActivity.this, "进入图片裁剪，再次点击按钮取消", Toast.LENGTH_SHORT).show();
                     lisenterEnable=1;//启用listener，事件结束后会进行裁剪
                 }
-              //  myImageView.setOnTouchListener(null);
             }
+        });
+
+        lumB=findViewById(R.id.lumB);//亮度调节
+        lumB.setOnClickListener(view -> {
+            SB.setMax(255);
+            SB.setProgress(127);
+            myImageView.setImageBitmap(selectbp);
+            SB.setVisibility(View.VISIBLE);
+            SB.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                @Override
+                public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                    float degree =i*1.0f/127;
+                    //仅处理亮度改变，后需整合
+                    lumM.setScale( degree, degree, degree,1);
+                    Bitmap nselectbp=Bitmap.createBitmap(selectbp.getWidth(),selectbp.getHeight(),Bitmap.Config.ARGB_8888);
+                    Canvas canvas = new Canvas(nselectbp);
+                    Paint paint = new Paint();
+                    ColorMatrix imageMatrix = new ColorMatrix();
+                    imageMatrix.postConcat(lumM);
+                    paint.setColorFilter(new ColorMatrixColorFilter(imageMatrix));
+                    canvas.drawBitmap(selectbp, 0, 0, paint);
+                    myImageView.setImageBitmap(nselectbp);
+                }
+
+                @Override
+                public void onStartTrackingTouch(SeekBar seekBar) {
+                }
+                @Override
+                public void onStopTrackingTouch(SeekBar seekBar) {
+                }
+            });
+        });
+
+        hueB=findViewById(R.id.hueB);//色调
+        hueB.setOnClickListener(view -> {
+            SB.setMax(255);
+            SB.setProgress(127);
+            myImageView.setImageBitmap(selectbp);
+            SB.setVisibility(View.VISIBLE);
+            SB.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                @Override
+                public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                    float hue=(i - 127) * 1.0F / 127 * 180;
+                    hueM.setRotate(0,hue);
+                    hueM.setRotate(1,hue);
+                    hueM.setRotate(2,hue);
+                    Bitmap nselectbp=Bitmap.createBitmap(selectbp.getWidth(),selectbp.getHeight(),Bitmap.Config.ARGB_8888);
+                    Canvas canvas = new Canvas(nselectbp);
+                    Paint paint = new Paint();
+                    ColorMatrix imageMatrix = new ColorMatrix();
+                    imageMatrix.postConcat(hueM);
+                    paint.setColorFilter(new ColorMatrixColorFilter(imageMatrix));
+                    canvas.drawBitmap(selectbp, 0, 0, paint);
+                    myImageView.setImageBitmap(nselectbp);
+                }
+
+                @Override
+                public void onStartTrackingTouch(SeekBar seekBar) {
+
+                }
+
+                @Override
+                public void onStopTrackingTouch(SeekBar seekBar) {
+
+                }
+            });
+        });
+
+        satB=findViewById(R.id.satB);//饱和度
+        satB.setOnClickListener(view -> {
+            SB.setMax(255);
+            SB.setProgress(127);
+            myImageView.setImageBitmap(selectbp);
+            SB.setVisibility(View.VISIBLE);
+            SB.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                @Override
+                public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                    float sat=i*1.0f/127;
+                    satM.setSaturation(sat);
+                    Bitmap nselectbp=Bitmap.createBitmap(selectbp.getWidth(),selectbp.getHeight(),Bitmap.Config.ARGB_8888);
+                    Canvas canvas = new Canvas(nselectbp);
+                    Paint paint = new Paint();
+                    ColorMatrix imageMatrix = new ColorMatrix();
+                    imageMatrix.postConcat(satM);
+                    paint.setColorFilter(new ColorMatrixColorFilter(imageMatrix));
+                    canvas.drawBitmap(selectbp, 0, 0, paint);
+                    myImageView.setImageBitmap(nselectbp);
+                }
+
+                @Override
+                public void onStartTrackingTouch(SeekBar seekBar) {
+
+                }
+
+                @Override
+                public void onStopTrackingTouch(SeekBar seekBar) {
+
+                }
+            });
         });
 
     }
@@ -492,6 +605,7 @@ public class MainActivity extends AppCompatActivity {
                 int newWidth = raw_width;
                 int newHeight = raw_height;
                 int inSampleSize = 1;
+                double max_size = 1024;
                 if(max > max_size) {
                     newWidth = raw_width / 2;
                     newHeight = raw_height / 2;
@@ -538,8 +652,9 @@ public class MainActivity extends AppCompatActivity {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        }
+        }else finish();
     }
+
 
     //灰度转换函数
     private void getRoI() {

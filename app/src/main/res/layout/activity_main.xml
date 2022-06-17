@@ -33,12 +33,6 @@
                 android:layout_marginBottom="10sp"
                 android:visibility="invisible"/>
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="bottom"
-                android:orientation="vertical"
-                >
 
                 <LinearLayout
                     android:layout_width="wrap_content"
@@ -97,7 +91,35 @@
                         android:text="直方图均衡" />
 
                 </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_gravity="center"
+                >
+                <Button
+                    android:id="@+id/hueB"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="色调调节" />
+
+                <Button
+                    android:id="@+id/satB"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="饱和度调节" />
+
+                <Button
+                    android:id="@+id/lumB"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="亮度调节" />
+
+
+
             </LinearLayout>
+
         </LinearLayout>
     </ScrollView>
 

@@ -12,6 +12,6 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 }
-rootProject.name = "picprocessor"
+rootProject.name = "HappyFace"
 include ':app'
 include ':OPENCV455'
