@@ -22,8 +22,4 @@ public class select_main extends AppCompatActivity {
             startActivity(intent);//启动另外一个活动
         });
     }
-    private void test(){
-        Toast.makeText(this, "1111", Toast.LENGTH_SHORT).show();
-    }
-
 }
