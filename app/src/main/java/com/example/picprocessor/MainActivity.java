@@ -6,8 +6,6 @@ import androidx.core.content.ContextCompat;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.app.Activity;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -21,9 +19,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.provider.MediaStore;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -49,20 +45,11 @@ import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
-import org.opencv.android.CameraActivity;
-
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -71,7 +58,6 @@ public class MainActivity extends AppCompatActivity {
     private ImageView myImageView;//通过ImageView来显示结果
     private Bitmap selectbp;//所选择的bitmap
     private int flag=0;
-    private View.OnTouchListener listener;
     private SeekBar SB;
 
     private float f_x=0,f_y=0;
@@ -118,6 +104,7 @@ public class MainActivity extends AppCompatActivity {
 
         myImageView = (ImageView)findViewById(R.id.imageView);
         myImageView.setScaleType(ImageView.ScaleType.FIT_CENTER);//设置显示图片的属性。把图片按比例扩大/缩小到View的宽度，居中显示
+        SB=findViewById(R.id.SBar);//程度调节进度条
 
         Intent intent = new Intent();
         intent.setType("image/*");
@@ -129,7 +116,11 @@ public class MainActivity extends AppCompatActivity {
             finish();
         });
 
-        SB=findViewById(R.id.SBar);//程度调节进度条
+        FloatingActionButton reset=findViewById(R.id.reset);
+        reset.setOnClickListener(view -> {
+            SB.setVisibility(View.INVISIBLE);
+            myImageView.setImageBitmap(selectbp);
+        });
 
         FloatingActionButton save=findViewById(R.id.save);//保存
         save.setOnClickListener(view -> {
@@ -203,7 +194,7 @@ public class MainActivity extends AppCompatActivity {
 
             }
 
-            //灰度转换函数
+            //模糊函数
             private void BlurProcess(int deg) {
                 Mat src = new Mat();
                 Mat temp = new Mat();
@@ -212,36 +203,6 @@ public class MainActivity extends AppCompatActivity {
                 Imgproc.cvtColor(src, temp, Imgproc.COLOR_BGRA2BGR);//转换为BGR（opencv中数据存储方式）
 
                 Imgproc.blur(temp,dst,new Size(deg,deg));//调整这个size数值就可以改变效果
-                Bitmap selectbp2 = Bitmap.createBitmap(src.width(), src.height(), Bitmap.Config.ARGB_8888) ;
-                Utils.matToBitmap(dst, selectbp2);//再将mat转换为位图
-                myImageView.setImageBitmap(selectbp2);//显示位图
-            }
-        });
-
-        //二值化
-        //定义处理的按钮
-        Button processBtn_Binarization = (Button)findViewById(R.id.Binarization);
-        processBtn_Binarization.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {//定义按钮监听器
-                if(flag==0){
-                    Toast.makeText(MainActivity.this, "请先选择一张图片！", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                SB.setVisibility(View.INVISIBLE);
-                BinarizationProcess();//二值化
-            }
-
-            //灰度转换函数
-            private void BinarizationProcess() {
-                Mat src = new Mat();
-                Mat temp = new Mat();
-                Mat dst = new Mat();
-                Utils.bitmapToMat(selectbp, src);//将位图转换为Mat数据。而对于位图，其由A、R、G、B通道组成
-                Imgproc.cvtColor(src, temp, Imgproc.COLOR_BGRA2BGR);//转换为BGR（opencv中数据存储方式）
-                Imgproc.cvtColor(temp, temp, Imgproc.COLOR_BGR2GRAY);//灰度化处理。
-
-                Imgproc.threshold(temp,dst,50,255,Imgproc.THRESH_BINARY);
                 Bitmap selectbp2 = Bitmap.createBitmap(src.width(), src.height(), Bitmap.Config.ARGB_8888) ;
                 Utils.matToBitmap(dst, selectbp2);//再将mat转换为位图
                 myImageView.setImageBitmap(selectbp2);//显示位图
@@ -546,21 +507,41 @@ public class MainActivity extends AppCompatActivity {
         xpB=findViewById(R.id.xiangpianB);
         xpB.setOnClickListener(view -> {
             //这里填图像颜色反转对应效果函数
+            SB.setVisibility(View.INVISIBLE);
+            float CM[]={-1,0,0,1,1,0,-1,0,1,1,0,0,-1,1,1,0,0,0,1,0};
+            dealColorMatrixEffect(CM);
         });
 
         qsB=findViewById(R.id.quseB);
         qsB.setOnClickListener(view -> {
             //这里填去色效果对应效果函数
+            SB.setVisibility(View.INVISIBLE);
+            float CM[]={1.05f,1.05f,1.05f,0,-1,1.05f,1.05f,1.05f,0,-1,1.05f,1.05f,1.05f,0,-1,0,0,0,1,0};
+
+            dealColorMatrixEffect(CM);
         });
 
         hjB=findViewById(R.id.huaijiuB);
         hjB.setOnClickListener(view -> {
             //这里填怀旧效果对应效果函数
+            SB.setVisibility(View.INVISIBLE);
+            float CM[]={0.393f,0.769f,0.189f,0,0,0.349f,0.686f,0.168f,0,0,0.272f,0.534f,0.131f,0,0,0,0,0,1,0};
+            dealColorMatrixEffect(CM);
         });
 
     }
 
-
+    //处理使用颜色矩阵可以实现的效果
+    private void dealColorMatrixEffect(float[] CM) {
+        Bitmap bitmap = Bitmap.createBitmap(selectbp.getWidth(), selectbp.getHeight(), Bitmap.Config.ARGB_8888);
+        ColorMatrix colorMatrix = new ColorMatrix();
+        colorMatrix.set(CM);
+        Canvas canvas = new Canvas(bitmap);
+        Paint paint = new Paint();
+        paint.setColorFilter(new ColorMatrixColorFilter(colorMatrix));
+        canvas.drawBitmap(selectbp, 0, 0, paint);
+        myImageView.setImageBitmap(bitmap);
+    }
 
 
     //免安装Opencv manager

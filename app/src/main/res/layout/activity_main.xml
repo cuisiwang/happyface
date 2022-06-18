@@ -54,11 +54,6 @@
                         android:layout_height="wrap_content"
                         android:text="模糊处理" />
 
-                    <Button
-                        android:id="@+id/Binarization"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="二值化" />
 
                     <Button
                         android:id="@+id/process_btn_roi"
@@ -150,12 +145,10 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentBottom="true"
-        android:layout_marginStart="15dp"
-        android:layout_marginTop="15dp"
-        android:layout_marginEnd="15dp"
         android:layout_marginBottom="15dp"
         android:backgroundTint="#6A93FD"
-        android:src="@drawable/close" />
+        android:src="@drawable/close"
+        android:layout_marginLeft="15dp" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/save"
@@ -163,13 +156,20 @@
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_alignParentBottom="true"
-        android:layout_marginStart="15dp"
-        android:layout_marginTop="15dp"
         android:layout_marginEnd="15dp"
         android:layout_marginBottom="15dp"
         android:backgroundTint="#6A93FD"
         android:src="@drawable/save" />
 
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/reset"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerInParent="true"
+        android:layout_marginBottom="15dp"
+        android:backgroundTint="#6A93FD"
+        android:src="@drawable/reset" />
 
 
 </RelativeLayout>
