@@ -12,12 +12,19 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:text="此处为LOGO图片"
-        android:textSize="65sp"
+        android:textSize="65dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.186" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/vertical_centerline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent=".50" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/new_photo"
@@ -25,14 +32,29 @@
         android:layout_height="wrap_content"
         android:scaleType="center"
         android:src="@drawable/add_photo"
+        app:fabCustomSize="@dimen/fab_size_normal"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/vertical_centerline"
+        app:layout_constraintHorizontal_bias="0.7"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.632"
-        app:fabCustomSize="@dimen/fab_size_normal"
-        app:maxImageSize="35dp"/>
+        app:layout_constraintVertical_bias="0.6"
+        app:maxImageSize="35dp" />
 
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/take_photo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:scaleType="center"
+        android:src="@drawable/take_pic"
+        app:fabCustomSize="@dimen/fab_size_normal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.3"
+        app:layout_constraintStart_toStartOf="@+id/vertical_centerline"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.6"
+        app:maxImageSize="35dp" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

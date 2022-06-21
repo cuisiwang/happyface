@@ -106,10 +106,14 @@ public class MainActivity extends AppCompatActivity {
         myImageView.setScaleType(ImageView.ScaleType.FIT_CENTER);//设置显示图片的属性。把图片按比例扩大/缩小到View的宽度，居中显示
         SB=findViewById(R.id.SBar);//程度调节进度条
 
-        Intent intent = new Intent();
-        intent.setType("image/*");
-        intent.setAction(Intent.ACTION_GET_CONTENT);//允许用户选择特殊种类的数据，并返回（特殊种类的数据：照一张相片或录一段音）
-        startActivityForResult(Intent.createChooser(intent,"选择图像..."), PICK_IMAGE_REQUEST);//启动另外一个活动
+        Uri uri=getIntent().getData();
+        if(uri==null){
+            Intent intent = new Intent();
+            intent.setType("image/*");
+            intent.setAction(Intent.ACTION_GET_CONTENT);//允许用户选择特殊种类的数据，并返回（特殊种类的数据：照一张相片或录一段音）
+            startActivityForResult(Intent.createChooser(intent,"选择图像..."), PICK_IMAGE_REQUEST);//启动另外一个活动
+        }else drawPicture(uri);
+
 
         FloatingActionButton close =findViewById(R.id.close);//返回重新选按钮
         close.setOnClickListener(view -> {
@@ -209,8 +213,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        //canny
-        //定义处理的按钮
+        //canny处理
         Button processBtn_canny = (Button)findViewById(R.id.canny);
         processBtn_canny.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -223,7 +226,7 @@ public class MainActivity extends AppCompatActivity {
                 cannyProcess();
             }
 
-            //灰度转换函数
+            //canny处理函数
             private void cannyProcess() {
                 Mat src = new Mat();
                 Mat dst = new Mat();
@@ -231,7 +234,6 @@ public class MainActivity extends AppCompatActivity {
                 Imgproc.cvtColor(src, src, Imgproc.COLOR_BGRA2BGR);//转换为BGR（opencv中数据存储方式）
                 //先进行高斯模糊
                 Imgproc.GaussianBlur(src,src,new Size(3,3),0);
-
                 Mat gray=new Mat();
                 Mat edges=new Mat();
                 //转换为灰度图
@@ -246,13 +248,11 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
-        //直方图
-        //定义处理的按钮
+        //直方图绘制
         Button processBtn_histogram = (Button)findViewById(R.id.histogram);
         processBtn_histogram.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {//定义按钮监听器
-                // makeText(MainActivity.this.getApplicationContext(), "hello, image process", Toast.LENGTH_SHORT).show();
+            public void onClick(View v) {
                 if(flag==0){
                     Toast.makeText(MainActivity.this, "请先选择一张图片！", Toast.LENGTH_SHORT).show();
                     return;
@@ -261,7 +261,7 @@ public class MainActivity extends AppCompatActivity {
                 histogramProcess();
             }
 
-            //处理
+            //绘制函数
             private void histogramProcess() {
                 Mat src = new Mat();
                 Mat dst = new Mat();
@@ -314,8 +314,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        //直方图均衡
-        //定义处理的按钮
+        //绘制直方图均衡
         Button processBtn_histogram_equalization = (Button)findViewById(R.id.histogram_equalization);
         processBtn_histogram_equalization.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -328,7 +327,7 @@ public class MainActivity extends AppCompatActivity {
                 histogram_equalization_Process();
             }
 
-            //处理
+            //绘制函数
             private void histogram_equalization_Process() {
                 Mat src = new Mat();
                 Mat dst = new Mat();
@@ -345,8 +344,8 @@ public class MainActivity extends AppCompatActivity {
                 myImageView.setImageBitmap(selectbp2);//显示位图
             }
 
-            private void displayHistogram(Mat gray, Mat dst){
 
+            private void displayHistogram(Mat gray, Mat dst){
                 //计算直方图数据并归一化
                 List<Mat> images=new ArrayList<>();
                 images.add(gray);
@@ -382,8 +381,7 @@ public class MainActivity extends AppCompatActivity {
 
         });
 
-        //ROI提取
-        //定义处理的按钮
+        //ROI截取
         Button processBtn_roi = (Button)findViewById(R.id.process_btn_roi);
         processBtn_roi.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -583,7 +581,6 @@ public class MainActivity extends AppCompatActivity {
     // 当子模块的代码执行完毕后再次返回主页面，将子activity中得到的数据显示在主界面/完成的数据交给主Activity处理。
     // 这种带数据的意图跳转需要使用activity的onActivityResult()方法
     //note:点击完选择图片按钮后，应该进入的是这里的选项
-    @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         //requestCode 最初提供给startActivityForResult（）的整数请求代码，允许您识别此结果的来源。
@@ -591,73 +588,74 @@ public class MainActivity extends AppCompatActivity {
         //resultCode 子活动通过其setResult（）返回的整数结果代码。适用于多个activity都返回数据时，来标识到底是哪一个activity返回的值。
         //data。一个Intent对象，带有返回的数据。可以通过data.getXxxExtra( );方法来获取指定数据类型的数据，
         super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {//当为选择image这个意图时，进入下面代码。选择图片以位图的形式显示出来
+        if(requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
             Uri uri = data.getData();
-            try {
-                Log.d("image-tag", "start to decode selected image now...");
-                InputStream input = getContentResolver().openInputStream(uri);
-                BitmapFactory.Options options = new BitmapFactory.Options();
-                options.inJustDecodeBounds = true;
-                BitmapFactory.decodeStream(input, null, options);
-                int raw_width = options.outWidth;
-                int raw_height = options.outHeight;
-                int max = Math.max(raw_width, raw_height);
-                int newWidth = raw_width;
-                int newHeight = raw_height;
-                int inSampleSize = 1;
-                double max_size = 1024;
-                if(max > max_size) {
-                    newWidth = raw_width / 2;
-                    newHeight = raw_height / 2;
-                    while((newWidth/inSampleSize) > max_size || (newHeight/inSampleSize) > max_size) {
-                        inSampleSize *=2;
-                    }
-                }
-
-                options.inSampleSize = inSampleSize;
-                options.inJustDecodeBounds = false;
-                options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-                selectbp = BitmapFactory.decodeStream(getContentResolver().openInputStream(uri), null, options);
-
-                myImageView.setImageBitmap(selectbp);//将所选择的位图显示出来
-                flag=1;
-                selectbp.compress(Bitmap.CompressFormat.PNG, 100, openFileOutput("picture.png", Context.MODE_PRIVATE));
-                //建立图片点击监听
-                final int[] time = {0};
-                myImageView.setOnTouchListener(new View.OnTouchListener() {
-                    @Override
-                    public boolean onTouch(View view, MotionEvent motionEvent) {
-                        if (motionEvent.getAction() == MotionEvent.ACTION_DOWN && time[0]==0&&lisenterEnable==1) {
-                           Toast.makeText(MainActivity.this, "点击图片裁剪区域1",Toast.LENGTH_SHORT).show();
-                           f_x = motionEvent.getX();
-                           f_y = motionEvent.getY();
-                           time[0]++;
-                           return true;
-                       }
-                       if (motionEvent.getAction() == MotionEvent.ACTION_DOWN&&time[0]==1&&lisenterEnable==1) {
-                           Toast.makeText(MainActivity.this, "点击图片裁剪区域2", Toast.LENGTH_SHORT).show();
-                           L_x = motionEvent.getX();
-                           L_y = motionEvent.getY();
-                           getRoI();//这个listener是为了裁剪函数（getRoI）设置
-
-                           lisenterEnable=0;
-                           f_x=f_y=L_y=L_x=0;
-                           time[0]=0;
-                           return true;
-                   }
-                        view.performClick();
-                        return false;
-                    }
-                });
-            } catch (Exception e) {
-                e.printStackTrace();
-                finish();
-            }
+            drawPicture(uri);
         }else finish();
     }
 
+    @SuppressLint("ClickableViewAccessibility")
+    private void drawPicture(Uri uri) {
+        try {
+            Log.d("image-tag", "start to decode selected image now...");
+            InputStream input = getContentResolver().openInputStream(uri);
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inJustDecodeBounds = true;
+            BitmapFactory.decodeStream(input, null, options);
+            int raw_width = options.outWidth;
+            int raw_height = options.outHeight;
+            int max = Math.max(raw_width, raw_height);
+            int newWidth = raw_width;
+            int newHeight = raw_height;
+            int inSampleSize = 1;
+            double max_size = 1024;
+            if(max > max_size) {
+                newWidth = raw_width / 2;
+                newHeight = raw_height / 2;
+                while((newWidth/inSampleSize) > max_size || (newHeight/inSampleSize) > max_size) {
+                    inSampleSize *=2;
+                }
+            }
+            options.inSampleSize = inSampleSize;
+            options.inJustDecodeBounds = false;
+            options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+            selectbp = BitmapFactory.decodeStream(getContentResolver().openInputStream(uri), null, options);
 
-    //灰度转换函数
+            myImageView.setImageBitmap(selectbp);//将所选择的位图显示出来
+            selectbp.compress(Bitmap.CompressFormat.PNG, 100, openFileOutput("picture.png", Context.MODE_PRIVATE));
+            flag=1;
+            //建立图片点击监听
+            final int[] time = {0};
+            myImageView.setOnTouchListener((view, motionEvent) -> {
+                if (motionEvent.getAction() == MotionEvent.ACTION_DOWN && time[0]==0&&lisenterEnable==1) {
+                    Toast.makeText(MainActivity.this, "点击图片裁剪区域1",Toast.LENGTH_SHORT).show();
+                    f_x = motionEvent.getX();
+                    f_y = motionEvent.getY();
+                    time[0]++;
+                    return true;
+                }
+                if (motionEvent.getAction() == MotionEvent.ACTION_DOWN&&time[0]==1&&lisenterEnable==1) {
+                    Toast.makeText(MainActivity.this, "点击图片裁剪区域2", Toast.LENGTH_SHORT).show();
+                    L_x = motionEvent.getX();
+                    L_y = motionEvent.getY();
+                    getRoI();//这个listener是为了裁剪函数（getRoI）设置
+
+                    lisenterEnable=0;
+                    f_x=f_y=L_y=L_x=0;
+                    time[0]=0;
+                    return true;
+                }
+                view.performClick();
+                return false;
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+            finish();
+        }
+    }
+
+
+    //ROI处理函数
     private void getRoI() {
         Mat src = new Mat();
         Utils.bitmapToMat(selectbp, src);//将位图转换为Mat数据。而对于位图，其由A、R、G、B通道组成
@@ -668,18 +666,12 @@ public class MainActivity extends AppCompatActivity {
         //思路是由绝对位置改为相对位置，再裁剪
         //****************************************************************************************
         Mat imgRectROI= new Mat(src, rect);      // 从原图中截取图片
-      /*  selectbp.recycle();
-        selectbp = Bitmap.createBitmap(imgRectROI.width(), imgRectROI.height(), Bitmap.Config.ARGB_8888) ;
-        //此处永久改变了原位图
-        Utils.matToBitmap(imgRectROI, selectbp);//再将mat转换为位图
-        myImageView.setImageBitmap(selectbp);//显示位图
-        */
         Bitmap selectbp2 = Bitmap.createBitmap(imgRectROI.width(), imgRectROI.height(), Bitmap.Config.ARGB_8888) ;
         Utils.matToBitmap(imgRectROI, selectbp2);//再将mat转换为位图
         myImageView.setImageBitmap(selectbp2);//显示位图
-        //展示就先不永久改变原位图
-        f_x=f_y=L_x=L_y=0;
+        f_x=f_y=L_x=L_y=0;//清空位置选择点
     }
+
     private void startRequestPermission(){
         //321为请求码
         ActivityCompat.requestPermissions(this,PERMISSIONS_STORAGE,321);

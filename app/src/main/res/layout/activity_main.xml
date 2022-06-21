@@ -11,88 +11,90 @@
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:clickable="false">
+            android:clickable="false"
+            android:orientation="vertical">
+
             <ImageView
                 android:id="@+id/imageView"
-                android:layout_gravity="center"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center"
                 android:focusable="true" />
+
             <SeekBar
                 android:id="@+id/SBar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginLeft="20dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginRight="20dp"
+                android:layout_marginBottom="10dp"
                 android:max="100"
-                android:layout_marginLeft="20sp"
-                android:layout_marginRight="20sp"
-                android:layout_marginTop="10sp"
-                android:layout_marginBottom="10sp"
-                android:visibility="invisible"/>
+                android:visibility="invisible" />
 
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_gravity="center"
-                    >
-
-                    <Button
-                        android:id="@+id/process_btn"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="灰度化处理"
-                        />
-
-                    <Button
-                        android:id="@+id/process_btn_blur"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="模糊处理" />
-
-
-                    <Button
-                        android:id="@+id/process_btn_roi"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="处理ROI" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_gravity="center"
-                    >
-
-                    <Button
-                        android:id="@+id/canny"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="canny" />
-                    <Button
-                        android:id="@+id/histogram"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="直方图" />
-                    <Button
-                        android:id="@+id/histogram_equalization"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="直方图均衡" />
-
-                </LinearLayout>
 
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
                 android:layout_gravity="center"
-                >
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/process_btn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="灰度化处理" />
+
+                <Button
+                    android:id="@+id/process_btn_blur"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="模糊处理" />
+
+
+                <Button
+                    android:id="@+id/process_btn_roi"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="处理ROI" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/canny"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="canny" />
+
+                <Button
+                    android:id="@+id/histogram"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="直方图" />
+
+                <Button
+                    android:id="@+id/histogram_equalization"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="直方图均衡" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:orientation="horizontal">
+
                 <Button
                     android:id="@+id/hueB"
                     android:layout_width="wrap_content"
@@ -111,12 +113,13 @@
                     android:layout_height="wrap_content"
                     android:text="亮度调节" />
             </LinearLayout>
+
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
                 android:layout_gravity="center"
-                >
+                android:orientation="horizontal">
+
                 <Button
                     android:id="@+id/xiangpianB"
                     android:layout_width="wrap_content"
@@ -135,6 +138,9 @@
                     android:layout_height="wrap_content"
                     android:text="去色滤镜" />
             </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="70dp"/>
 
         </LinearLayout>
     </ScrollView>
@@ -145,10 +151,10 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentBottom="true"
+        android:layout_marginLeft="15dp"
         android:layout_marginBottom="15dp"
         android:backgroundTint="#6A93FD"
-        android:src="@drawable/close"
-        android:layout_marginLeft="15dp" />
+        android:src="@drawable/close" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/save"

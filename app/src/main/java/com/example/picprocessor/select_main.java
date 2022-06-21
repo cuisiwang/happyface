@@ -11,15 +11,23 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 public class select_main extends AppCompatActivity {
 
     private FloatingActionButton newP;
+    private FloatingActionButton takeP;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_select_main);
         newP=findViewById(R.id.new_photo);
         newP.setOnClickListener(view -> {
             Intent intent = new Intent(this,MainActivity.class);
             startActivity(intent);//启动另外一个活动
+        });
+
+        takeP=findViewById(R.id.take_photo);
+        takeP.setOnClickListener(view -> {
+            Intent intent=new Intent(this,CameraXActivity.class);
+            startActivity(intent);
         });
     }
 }
