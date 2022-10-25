@@ -19,7 +19,9 @@ import android.provider.MediaStore
 
 import android.content.ContentValues
 import android.content.Intent
+import android.graphics.YuvImage
 import android.os.Build
+import androidx.camera.core.ImageCapture
 import com.example.picprocessor.databinding.ActivityCameraXactivityBinding
 
 
@@ -67,11 +69,14 @@ class CameraXActivity : AppCompatActivity() {
         }
 
         // Create output options object which contains file + metadata
+        //把这段注释掉估计就不会保存了
         val outputOptions = ImageCapture.OutputFileOptions
             .Builder(contentResolver,
                 MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
                 contentValues)
             .build()
+
+        val a:YuvToRgbConverter = YuvToRgbConverter(baseContext)
 
         // Set up image capture listener, which is triggered after photo has
         // been taken
@@ -151,7 +156,6 @@ class CameraXActivity : AppCompatActivity() {
         private val REQUIRED_PERMISSIONS =
             mutableListOf (
                 Manifest.permission.CAMERA,
-                Manifest.permission.RECORD_AUDIO
             ).apply {
                 if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
                     add(Manifest.permission.WRITE_EXTERNAL_STORAGE)

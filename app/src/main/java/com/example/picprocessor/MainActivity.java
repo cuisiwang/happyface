@@ -6,6 +6,7 @@ import androidx.core.content.ContextCompat;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -16,15 +17,18 @@ import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
-import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.Toast;
 
@@ -45,6 +49,7 @@ import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
+
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -56,9 +61,11 @@ public class MainActivity extends AppCompatActivity {
 
     private final int PICK_IMAGE_REQUEST = 1;
     private ImageView myImageView;//通过ImageView来显示结果
-    private Bitmap selectbp;//所选择的bitmap
+    private Bitmap originalBP;//所选照片原BP
+    private Bitmap selectbp;//所绘制的bitmap
     private int flag=0;
     private SeekBar SB;
+    private Dialog dialog;
 
     private float f_x=0,f_y=0;
     private float L_x=0,L_y=0;//裁剪图片所用四个坐标点
@@ -98,12 +105,21 @@ public class MainActivity extends AppCompatActivity {
             if(i!= PackageManager.PERMISSION_GRANTED){
                 //重新申请权限函数
                 startRequestPermission();
-                Log.e("这里","权限请求成功");
             }
         }
 
+        dialog=new AnimDialog(MainActivity.this,R.style.FullActivity);
+
+
         myImageView = (ImageView)findViewById(R.id.imageView);
         myImageView.setScaleType(ImageView.ScaleType.FIT_CENTER);//设置显示图片的属性。把图片按比例扩大/缩小到View的宽度，居中显示
+       // dialog.setContentView(myImageView);
+        myImageView.setOnClickListener(view -> {
+            dialog.show();
+            dialog.setContentView(getImageView(new BitmapDrawable(getResources(),selectbp)));
+        });
+
+
         SB=findViewById(R.id.SBar);//程度调节进度条
 
         Uri uri=getIntent().getData();
@@ -112,7 +128,10 @@ public class MainActivity extends AppCompatActivity {
             intent.setType("image/*");
             intent.setAction(Intent.ACTION_GET_CONTENT);//允许用户选择特殊种类的数据，并返回（特殊种类的数据：照一张相片或录一段音）
             startActivityForResult(Intent.createChooser(intent,"选择图像..."), PICK_IMAGE_REQUEST);//启动另外一个活动
-        }else drawPicture(uri);
+        }else {
+            drawPicture(uri);
+        }
+
 
 
         FloatingActionButton close =findViewById(R.id.close);//返回重新选按钮
@@ -123,7 +142,8 @@ public class MainActivity extends AppCompatActivity {
         FloatingActionButton reset=findViewById(R.id.reset);
         reset.setOnClickListener(view -> {
             SB.setVisibility(View.INVISIBLE);
-            myImageView.setImageBitmap(selectbp);
+            selectbp=originalBP.copy(originalBP.getConfig(),true);
+            myImageView.setImageBitmap(originalBP);
         });
 
         FloatingActionButton save=findViewById(R.id.save);//保存
@@ -145,72 +165,35 @@ public class MainActivity extends AppCompatActivity {
                 SB.setVisibility(View.INVISIBLE);
                 convertGray();//灰度转换
             }
-
-            //灰度转换函数
-            private void convertGray() {
-                Mat src = new Mat();
-                Mat temp = new Mat();
-                Mat dst = new Mat();
-                Utils.bitmapToMat(selectbp, src);//将位图转换为Mat数据。而对于位图，其由A、R、G、B通道组成
-
-                Imgproc.cvtColor(src, temp, Imgproc.COLOR_BGRA2BGR);//转换为BGR（opencv中数据存储方式）
-                Log.i("CV", "image type:" + (temp.type() == CvType.CV_8UC3));
-                Imgproc.cvtColor(temp, dst, Imgproc.COLOR_BGR2GRAY);//灰度化处理。
-
-                Bitmap selectbp1 = Bitmap.createBitmap(src.width(), src.height(), Bitmap.Config.ARGB_8888) ;
-                Utils.matToBitmap(dst, selectbp1);//再将mat转换为位图
-                myImageView.setImageBitmap(selectbp1);//显示位图
-            }
         });
 
         //模糊
         //定义处理的按钮
         Button processBtn_blur = (Button)findViewById(R.id.process_btn_blur);
-        processBtn_blur.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {//定义按钮监听器
-                if(flag==0){
-                    Toast.makeText(MainActivity.this, "请先选择一张图片！", Toast.LENGTH_SHORT).show();
-                    return;
+        processBtn_blur.setOnClickListener(v -> {//定义按钮监听器
+            if(flag==0){
+                Toast.makeText(MainActivity.this, "请先选择一张图片！", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            SB.setOnSeekBarChangeListener(null);
+            myImageView.setImageBitmap(selectbp);
+            SB.setVisibility(View.VISIBLE);
+            SB.setMax(50);
+            SB.setProgress(0);
+            Bitmap priBP=selectbp.copy(selectbp.getConfig(),true);
+            SB.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                @Override
+                public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                    if(i==0) return;
+                    BlurProcess(i,priBP);//灰度转换
                 }
-                SB.setOnSeekBarChangeListener(null);
-                myImageView.setImageBitmap(selectbp);
-                SB.setVisibility(View.VISIBLE);
-                SB.setMax(50);
-                SB.setProgress(0);
-                SB.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-                    @Override
-                    public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                        if(i==0) return;
-                        BlurProcess(i);//灰度转换
-                    }
-
-                    @Override
-                    public void onStartTrackingTouch(SeekBar seekBar) {
-
-                    }
-
-                    @Override
-                    public void onStopTrackingTouch(SeekBar seekBar) {
-
-                    }
-                });
-
-            }
-
-            //模糊函数
-            private void BlurProcess(int deg) {
-                Mat src = new Mat();
-                Mat temp = new Mat();
-                Mat dst = new Mat();
-                Utils.bitmapToMat(selectbp, src);//将位图转换为Mat数据。而对于位图，其由A、R、G、B通道组成
-                Imgproc.cvtColor(src, temp, Imgproc.COLOR_BGRA2BGR);//转换为BGR（opencv中数据存储方式）
-
-                Imgproc.blur(temp,dst,new Size(deg,deg));//调整这个size数值就可以改变效果
-                Bitmap selectbp2 = Bitmap.createBitmap(src.width(), src.height(), Bitmap.Config.ARGB_8888) ;
-                Utils.matToBitmap(dst, selectbp2);//再将mat转换为位图
-                myImageView.setImageBitmap(selectbp2);//显示位图
-            }
+                @Override
+                public void onStartTrackingTouch(SeekBar seekBar) {
+                }
+                @Override
+                public void onStopTrackingTouch(SeekBar seekBar) {
+                }
+            });
         });
 
         //canny处理
@@ -405,10 +388,6 @@ public class MainActivity extends AppCompatActivity {
 
         lumB=findViewById(R.id.lumB);//亮度调节
         lumB.setOnClickListener(view -> {
-            SB.setMax(255);
-            SB.setProgress(127);
-            myImageView.setImageBitmap(selectbp);
-            SB.setVisibility(View.VISIBLE);
             SB.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                 @Override
                 public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
@@ -432,14 +411,15 @@ public class MainActivity extends AppCompatActivity {
                 public void onStopTrackingTouch(SeekBar seekBar) {
                 }
             });
-        });
-
-        hueB=findViewById(R.id.hueB);//色调
-        hueB.setOnClickListener(view -> {
             SB.setMax(255);
             SB.setProgress(127);
             myImageView.setImageBitmap(selectbp);
             SB.setVisibility(View.VISIBLE);
+        });
+
+
+        hueB=findViewById(R.id.hueB);//色调
+        hueB.setOnClickListener(view -> {
             SB.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                 @Override
                 public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
@@ -467,14 +447,15 @@ public class MainActivity extends AppCompatActivity {
 
                 }
             });
-        });
-
-        satB=findViewById(R.id.satB);//饱和度
-        satB.setOnClickListener(view -> {
             SB.setMax(255);
             SB.setProgress(127);
             myImageView.setImageBitmap(selectbp);
             SB.setVisibility(View.VISIBLE);
+        });
+
+
+        satB=findViewById(R.id.satB);//饱和度
+        satB.setOnClickListener(view -> {
             SB.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                 @Override
                 public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
@@ -500,6 +481,10 @@ public class MainActivity extends AppCompatActivity {
 
                 }
             });
+            SB.setMax(255);
+            SB.setProgress(127);
+            myImageView.setImageBitmap(selectbp);
+            SB.setVisibility(View.VISIBLE);
         });
 
         xpB=findViewById(R.id.xiangpianB);
@@ -542,6 +527,46 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+
+    //效果处理各函数
+    //=============================================================================================================================================
+    //灰度转换函数
+    private void convertGray() {
+        Mat src = new Mat();
+        Mat temp = new Mat();
+        Mat dst = new Mat();
+        Utils.bitmapToMat(selectbp, src);//将位图转换为Mat数据。而对于位图，其由A、R、G、B通道组成
+
+        Imgproc.cvtColor(src, temp, Imgproc.COLOR_BGRA2BGR);//转换为BGR（opencv中数据存储方式）
+        Log.i("CV", "image type:" + (temp.type() == CvType.CV_8UC3));
+        Imgproc.cvtColor(temp, dst, Imgproc.COLOR_BGR2GRAY);//灰度化处理。
+
+        Bitmap selectbp1 = Bitmap.createBitmap(src.width(), src.height(), Bitmap.Config.ARGB_8888) ;
+        Utils.matToBitmap(dst, selectbp1);//再将mat转换为位图
+        setBP(selectbp1);
+    }
+
+    //模糊函数
+    private void BlurProcess(int deg,Bitmap priBP) {
+        Bitmap temBP=priBP.copy(priBP.getConfig(),true);
+        Mat src = new Mat();
+        Mat temp = new Mat();
+        Mat dst = new Mat();
+        Utils.bitmapToMat(temBP, src);//将位图转换为Mat数据。而对于位图，其由A、R、G、B通道组成
+        Imgproc.cvtColor(src, temp, Imgproc.COLOR_BGRA2BGR);//转换为BGR（opencv中数据存储方式）
+
+        Imgproc.blur(temp,dst,new Size(deg,deg));//调整这个size数值就可以改变效果
+        Bitmap selectbp1 = Bitmap.createBitmap(src.width(), src.height(), Bitmap.Config.ARGB_8888) ;
+        Utils.matToBitmap(dst, selectbp1);//再将mat转换为位图
+        setBP(selectbp1);
+    }
+
+    private void setBP(Bitmap bm){
+        selectbp=bm;
+        myImageView.setImageBitmap(selectbp);
+    }
+
+    //============================================================================================================================================
     //免安装Opencv manager
     //onResume()这个方法在活动准备好和用户进行交互的时候调用。此时的活动一定位于返回栈的栈顶，并且处于运行状态。
     //所以在活动开启前调用，检查是否有opencv库，若没有，则下载
@@ -620,12 +645,12 @@ public class MainActivity extends AppCompatActivity {
             options.inJustDecodeBounds = false;
             options.inPreferredConfig = Bitmap.Config.ARGB_8888;
             selectbp = BitmapFactory.decodeStream(getContentResolver().openInputStream(uri), null, options);
-
+            originalBP=BitmapFactory.decodeStream(getContentResolver().openInputStream(uri), null, options);
             myImageView.setImageBitmap(selectbp);//将所选择的位图显示出来
             selectbp.compress(Bitmap.CompressFormat.PNG, 100, openFileOutput("picture.png", Context.MODE_PRIVATE));
             flag=1;
             //建立图片点击监听
-            final int[] time = {0};
+            /*final int[] time = {0};
             myImageView.setOnTouchListener((view, motionEvent) -> {
                 if (motionEvent.getAction() == MotionEvent.ACTION_DOWN && time[0]==0&&lisenterEnable==1) {
                     Toast.makeText(MainActivity.this, "点击图片裁剪区域1",Toast.LENGTH_SHORT).show();
@@ -647,7 +672,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 view.performClick();
                 return false;
-            });
+            });*/
         } catch (Exception e) {
             e.printStackTrace();
             finish();
@@ -670,6 +695,27 @@ public class MainActivity extends AppCompatActivity {
         Utils.matToBitmap(imgRectROI, selectbp2);//再将mat转换为位图
         myImageView.setImageBitmap(selectbp2);//显示位图
         f_x=f_y=L_x=L_y=0;//清空位置选择点
+    }
+    //设置大图imageView
+    private ImageView getImageView(Drawable draw){
+        ImageView imageView = new ImageView(this);
+
+        //宽高
+        imageView.setLayoutParams(new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        imageView.setOnClickListener(v->{
+            dialog.dismiss();
+        });
+        //imageView设置图片
+       /* try {
+            InputStream input = getContentResolver().openInputStream(uri);
+            Drawable drawable=Drawable.createFromStream(input,uri.toString());
+            imageView.setImageDrawable(drawable);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }*/
+        imageView.setImageDrawable(draw);
+        return imageView;
+
     }
 
     private void startRequestPermission(){
