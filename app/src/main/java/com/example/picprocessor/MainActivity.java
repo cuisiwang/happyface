@@ -25,7 +25,6 @@ import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -85,7 +84,7 @@ public class MainActivity extends AppCompatActivity {
     private Button qsB;//去色滤镜
 
     //相机权限获取
-    private static String[] PERMISSIONS_STORAGE = {
+    private static final String[] PERMISSIONS_STORAGE = {
             Manifest.permission.WRITE_EXTERNAL_STORAGE,//写权限
             Manifest.permission.CAMERA//照相权限
     };
@@ -135,9 +134,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         FloatingActionButton close =findViewById(R.id.close);//返回重新选按钮
-        close.setOnClickListener(view -> {
-            finish();
-        });
+        close.setOnClickListener(view -> finish());
 
         FloatingActionButton reset=findViewById(R.id.reset);
         reset.setOnClickListener(view -> {
@@ -155,16 +152,13 @@ public class MainActivity extends AppCompatActivity {
 
         //定义处理的按钮
         Button processBtn = (Button)findViewById(R.id.process_btn);
-        processBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {//定义按钮监听器
-                if(flag==0){
-                    Toast.makeText(MainActivity.this, "请先选择一张图片！", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                SB.setVisibility(View.INVISIBLE);
-                convertGray();//灰度转换
+        processBtn.setOnClickListener(v -> {//定义按钮监听器
+            if(flag==0){
+                Toast.makeText(MainActivity.this, "请先选择一张图片！", Toast.LENGTH_SHORT).show();
+                return;
             }
+            SB.setVisibility(View.INVISIBLE);
+            convertGray();//灰度转换
         });
 
         //模糊
@@ -176,7 +170,6 @@ public class MainActivity extends AppCompatActivity {
                 return;
             }
             SB.setOnSeekBarChangeListener(null);
-            myImageView.setImageBitmap(selectbp);
             SB.setVisibility(View.VISIBLE);
             SB.setMax(50);
             SB.setProgress(0);
@@ -198,40 +191,18 @@ public class MainActivity extends AppCompatActivity {
 
         //canny处理
         Button processBtn_canny = (Button)findViewById(R.id.canny);
-        processBtn_canny.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {//定义按钮监听器
-                if(flag==0){
-                    Toast.makeText(MainActivity.this, "请先选择一张图片！", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                SB.setVisibility(View.INVISIBLE);
-                cannyProcess();
+        processBtn_canny.setOnClickListener(v -> {//定义按钮监听器
+            if(flag==0){
+                Toast.makeText(MainActivity.this, "请先选择一张图片！", Toast.LENGTH_SHORT).show();
+                return;
             }
-
-            //canny处理函数
-            private void cannyProcess() {
-                Mat src = new Mat();
-                Mat dst = new Mat();
-                Utils.bitmapToMat(selectbp, src);//将位图转换为Mat数据。而对于位图，其由A、R、G、B通道组成
-                Imgproc.cvtColor(src, src, Imgproc.COLOR_BGRA2BGR);//转换为BGR（opencv中数据存储方式）
-                //先进行高斯模糊
-                Imgproc.GaussianBlur(src,src,new Size(3,3),0);
-                Mat gray=new Mat();
-                Mat edges=new Mat();
-                //转换为灰度图
-                Imgproc.cvtColor(src,gray,Imgproc.COLOR_BGR2GRAY);
-                Imgproc.Canny(src,edges,50,150,3,true);
-                Core.bitwise_and(src,src,dst,edges);
-
-                Bitmap selectbp2 = Bitmap.createBitmap(src.width(), src.height(), Bitmap.Config.ARGB_8888) ;
-                Utils.matToBitmap(dst, selectbp2);//再将mat转换为位图
-                myImageView.setImageBitmap(selectbp2);//显示位图
-            }
+            SB.setVisibility(View.INVISIBLE);
+            cannyProcess();
         });
 
 
         //直方图绘制
+        //想删了
         Button processBtn_histogram = (Button)findViewById(R.id.histogram);
         processBtn_histogram.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -365,24 +336,22 @@ public class MainActivity extends AppCompatActivity {
         });
 
         //ROI截取
+        //再想想
         Button processBtn_roi = (Button)findViewById(R.id.process_btn_roi);
-        processBtn_roi.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {//定义按钮监听器
-                if(flag==0){
-                    Toast.makeText(MainActivity.this, "请先选择一张图片！", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                SB.setVisibility(View.INVISIBLE);
-                myImageView.setImageBitmap(selectbp);
-                if(lisenterEnable==1){
-                    Toast.makeText(MainActivity.this, "图片裁剪已关闭", Toast.LENGTH_SHORT).show();
-                    lisenterEnable=0;
-                    f_x=f_y=L_y=L_x=0;
-                }else{
-                    Toast.makeText(MainActivity.this, "进入图片裁剪，再次点击按钮取消", Toast.LENGTH_SHORT).show();
-                    lisenterEnable=1;//启用listener，事件结束后会进行裁剪
-                }
+        processBtn_roi.setOnClickListener(v -> {//定义按钮监听器
+            if(flag==0){
+                Toast.makeText(MainActivity.this, "请先选择一张图片！", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            SB.setVisibility(View.INVISIBLE);
+            myImageView.setImageBitmap(selectbp);
+            if(lisenterEnable==1){
+                Toast.makeText(MainActivity.this, "图片裁剪已关闭", Toast.LENGTH_SHORT).show();
+                lisenterEnable=0;
+                f_x=f_y=L_y=L_x=0;
+            }else{
+                Toast.makeText(MainActivity.this, "进入图片裁剪，再次点击按钮取消", Toast.LENGTH_SHORT).show();
+                lisenterEnable=1;//启用listener，事件结束后会进行裁剪
             }
         });
 
@@ -491,7 +460,7 @@ public class MainActivity extends AppCompatActivity {
         xpB.setOnClickListener(view -> {
             //这里填图像颜色反转对应效果函数
             SB.setVisibility(View.INVISIBLE);
-            float CM[]={-1,0,0,1,1,0,-1,0,1,1,0,0,-1,1,1,0,0,0,1,0};
+            float[] CM ={-1,0,0,1,1,0,-1,0,1,1,0,0,-1,1,1,0,0,0,1,0};
             dealColorMatrixEffect(CM);
         });
 
@@ -499,7 +468,7 @@ public class MainActivity extends AppCompatActivity {
         qsB.setOnClickListener(view -> {
             //这里填去色效果对应效果函数
             SB.setVisibility(View.INVISIBLE);
-            float CM[]={1.05f,1.05f,1.05f,0,-1,1.05f,1.05f,1.05f,0,-1,1.05f,1.05f,1.05f,0,-1,0,0,0,1,0};
+            float[] CM ={1.05f,1.05f,1.05f,0,-1,1.05f,1.05f,1.05f,0,-1,1.05f,1.05f,1.05f,0,-1,0,0,0,1,0};
 
             dealColorMatrixEffect(CM);
         });
@@ -508,25 +477,10 @@ public class MainActivity extends AppCompatActivity {
         hjB.setOnClickListener(view -> {
             //这里填怀旧效果对应效果函数
             SB.setVisibility(View.INVISIBLE);
-            float CM[]={0.393f,0.769f,0.189f,0,0,0.349f,0.686f,0.168f,0,0,0.272f,0.534f,0.131f,0,0,0,0,0,1,0};
+            float[] CM ={0.393f,0.769f,0.189f,0,0,0.349f,0.686f,0.168f,0,0,0.272f,0.534f,0.131f,0,0,0,0,0,1,0};
             dealColorMatrixEffect(CM);
         });
-
     }
-
-    //处理使用颜色矩阵可以实现的效果
-    private void dealColorMatrixEffect(float[] CM) {
-        Bitmap bitmap = Bitmap.createBitmap(selectbp.getWidth(), selectbp.getHeight(), Bitmap.Config.ARGB_8888);
-        ColorMatrix colorMatrix = new ColorMatrix();
-        colorMatrix.set(CM);
-        Canvas canvas = new Canvas(bitmap);
-        Paint paint = new Paint();
-        paint.setColorFilter(new ColorMatrixColorFilter(colorMatrix));
-        canvas.drawBitmap(selectbp, 0, 0, paint);
-        myImageView.setImageBitmap(bitmap);
-    }
-
-
 
     //效果处理各函数
     //=============================================================================================================================================
@@ -560,6 +514,37 @@ public class MainActivity extends AppCompatActivity {
         Utils.matToBitmap(dst, selectbp1);//再将mat转换为位图
         setBP(selectbp1);
     }
+    //canny处理函数
+    private void cannyProcess() {
+        Mat src = new Mat();
+        Mat dst = new Mat();
+        Utils.bitmapToMat(selectbp, src);//将位图转换为Mat数据。而对于位图，其由A、R、G、B通道组成
+        Imgproc.cvtColor(src, src, Imgproc.COLOR_BGRA2BGR);//转换为BGR（opencv中数据存储方式）
+        //先进行高斯模糊
+        Imgproc.GaussianBlur(src,src,new Size(3,3),0);
+        Mat gray=new Mat();
+        Mat edges=new Mat();
+        //转换为灰度图
+        Imgproc.cvtColor(src,gray,Imgproc.COLOR_BGR2GRAY);
+        Imgproc.Canny(src,edges,50,150,3,true);
+        Core.bitwise_and(src,src,dst,edges);
+
+        Bitmap selectbp2 = Bitmap.createBitmap(src.width(), src.height(), Bitmap.Config.ARGB_8888) ;
+        Utils.matToBitmap(dst, selectbp2);//再将mat转换为位图
+        setBP(selectbp2);//显示位图
+    }
+
+    //处理使用颜色矩阵可以实现的效果
+    private void dealColorMatrixEffect(float[] CM) {
+        Bitmap bitmap = Bitmap.createBitmap(selectbp.getWidth(), selectbp.getHeight(), Bitmap.Config.ARGB_8888);
+        ColorMatrix colorMatrix = new ColorMatrix();
+        colorMatrix.set(CM);
+        Canvas canvas = new Canvas(bitmap);
+        Paint paint = new Paint();
+        paint.setColorFilter(new ColorMatrixColorFilter(colorMatrix));
+        canvas.drawBitmap(selectbp, 0, 0, paint);
+        myImageView.setImageBitmap(bitmap);
+    }
 
     private void setBP(Bitmap bm){
         selectbp=bm;
@@ -585,18 +570,13 @@ public class MainActivity extends AppCompatActivity {
 
 
     // OpenCV库加载并初始化成功后的回调函数
-    private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
+    private final BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
         public void onManagerConnected(int status) {
-            switch (status) {
-                case LoaderCallbackInterface.SUCCESS: {
-                    System.out.println("OpenCV loaded successfully");
-                }
-                break;
-                default: {
-                    super.onManagerConnected(status);
-                }
-                break;
+            if (status == LoaderCallbackInterface.SUCCESS) {
+                System.out.println("OpenCV loaded successfully");
+            } else {
+                super.onManagerConnected(status);
             }
         }
     };
@@ -702,9 +682,7 @@ public class MainActivity extends AppCompatActivity {
 
         //宽高
         imageView.setLayoutParams(new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-        imageView.setOnClickListener(v->{
-            dialog.dismiss();
-        });
+        imageView.setOnClickListener(v-> dialog.dismiss());
         //imageView设置图片
        /* try {
             InputStream input = getContentResolver().openInputStream(uri);
