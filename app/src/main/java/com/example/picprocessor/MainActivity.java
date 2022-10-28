@@ -145,8 +145,7 @@ public class MainActivity extends AppCompatActivity {
 
         FloatingActionButton save=findViewById(R.id.save);//保存
         save.setOnClickListener(view -> {
-            Bitmap bitmap = ((BitmapDrawable)myImageView.getDrawable()).getBitmap();
-            MediaStore.Images.Media.insertImage(getContentResolver(), bitmap, "HappyFace"+new SimpleDateFormat("yyyy-MM-dd").format(new Date(System.currentTimeMillis())),"");
+            MediaStore.Images.Media.insertImage(getContentResolver(), selectbp, "HappyFace"+new SimpleDateFormat("yyyy-MM-dd").format(new Date(System.currentTimeMillis())),"");
             Toast.makeText(this, "保存成功！", Toast.LENGTH_SHORT).show();
         });
 
@@ -165,14 +164,14 @@ public class MainActivity extends AppCompatActivity {
         //定义处理的按钮
         Button processBtn_blur = (Button)findViewById(R.id.process_btn_blur);
         processBtn_blur.setOnClickListener(v -> {//定义按钮监听器
-            if(flag==0){
-                Toast.makeText(MainActivity.this, "请先选择一张图片！", Toast.LENGTH_SHORT).show();
-                return;
-            }
             SB.setOnSeekBarChangeListener(null);
             SB.setVisibility(View.VISIBLE);
             SB.setMax(50);
             SB.setProgress(0);
+            if(flag==0){
+                Toast.makeText(MainActivity.this, "请先选择一张图片！", Toast.LENGTH_SHORT).show();
+                return;
+            }
             Bitmap priBP=selectbp.copy(selectbp.getConfig(),true);
             SB.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                 @Override
@@ -187,6 +186,7 @@ public class MainActivity extends AppCompatActivity {
                 public void onStopTrackingTouch(SeekBar seekBar) {
                 }
             });
+
         });
 
         //canny处理
@@ -203,7 +203,7 @@ public class MainActivity extends AppCompatActivity {
 
         //直方图绘制
         //想删了
-        Button processBtn_histogram = (Button)findViewById(R.id.histogram);
+        /*Button processBtn_histogram = (Button)findViewById(R.id.histogram);
         processBtn_histogram.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -333,7 +333,7 @@ public class MainActivity extends AppCompatActivity {
                 gray.release();
             }
 
-        });
+        });*/
 
         //ROI截取
         //再想想
@@ -357,6 +357,12 @@ public class MainActivity extends AppCompatActivity {
 
         lumB=findViewById(R.id.lumB);//亮度调节
         lumB.setOnClickListener(view -> {
+            SB.setOnSeekBarChangeListener(null);
+            SB.setMax(255);
+            SB.setProgress(127);
+            myImageView.setImageBitmap(selectbp);
+            SB.setVisibility(View.VISIBLE);
+            Bitmap priBP=selectbp.copy(selectbp.getConfig(),true);
             SB.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                 @Override
                 public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
@@ -369,8 +375,8 @@ public class MainActivity extends AppCompatActivity {
                     ColorMatrix imageMatrix = new ColorMatrix();
                     imageMatrix.postConcat(lumM);
                     paint.setColorFilter(new ColorMatrixColorFilter(imageMatrix));
-                    canvas.drawBitmap(selectbp, 0, 0, paint);
-                    myImageView.setImageBitmap(nselectbp);
+                    canvas.drawBitmap(priBP, 0, 0, paint);
+                    setBP(nselectbp);
                 }
 
                 @Override
@@ -380,15 +386,17 @@ public class MainActivity extends AppCompatActivity {
                 public void onStopTrackingTouch(SeekBar seekBar) {
                 }
             });
-            SB.setMax(255);
-            SB.setProgress(127);
-            myImageView.setImageBitmap(selectbp);
-            SB.setVisibility(View.VISIBLE);
         });
 
 
         hueB=findViewById(R.id.hueB);//色调
         hueB.setOnClickListener(view -> {
+            SB.setOnSeekBarChangeListener(null);
+            SB.setMax(255);
+            SB.setProgress(127);
+            myImageView.setImageBitmap(selectbp);
+            SB.setVisibility(View.VISIBLE);
+            Bitmap priBP=selectbp.copy(selectbp.getConfig(),true);
             SB.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                 @Override
                 public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
@@ -402,8 +410,8 @@ public class MainActivity extends AppCompatActivity {
                     ColorMatrix imageMatrix = new ColorMatrix();
                     imageMatrix.postConcat(hueM);
                     paint.setColorFilter(new ColorMatrixColorFilter(imageMatrix));
-                    canvas.drawBitmap(selectbp, 0, 0, paint);
-                    myImageView.setImageBitmap(nselectbp);
+                    canvas.drawBitmap(priBP, 0, 0, paint);
+                    setBP(nselectbp);
                 }
 
                 @Override
@@ -416,15 +424,18 @@ public class MainActivity extends AppCompatActivity {
 
                 }
             });
-            SB.setMax(255);
-            SB.setProgress(127);
-            myImageView.setImageBitmap(selectbp);
-            SB.setVisibility(View.VISIBLE);
+
         });
 
 
         satB=findViewById(R.id.satB);//饱和度
         satB.setOnClickListener(view -> {
+            SB.setOnSeekBarChangeListener(null);
+            SB.setMax(255);
+            SB.setProgress(127);
+            myImageView.setImageBitmap(selectbp);
+            SB.setVisibility(View.VISIBLE);
+            Bitmap priBP=selectbp.copy(selectbp.getConfig(),true);
             SB.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                 @Override
                 public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
@@ -436,8 +447,8 @@ public class MainActivity extends AppCompatActivity {
                     ColorMatrix imageMatrix = new ColorMatrix();
                     imageMatrix.postConcat(satM);
                     paint.setColorFilter(new ColorMatrixColorFilter(imageMatrix));
-                    canvas.drawBitmap(selectbp, 0, 0, paint);
-                    myImageView.setImageBitmap(nselectbp);
+                    canvas.drawBitmap(priBP, 0, 0, paint);
+                    setBP(nselectbp);
                 }
 
                 @Override
@@ -450,10 +461,6 @@ public class MainActivity extends AppCompatActivity {
 
                 }
             });
-            SB.setMax(255);
-            SB.setProgress(127);
-            myImageView.setImageBitmap(selectbp);
-            SB.setVisibility(View.VISIBLE);
         });
 
         xpB=findViewById(R.id.xiangpianB);

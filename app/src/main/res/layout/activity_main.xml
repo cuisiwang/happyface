@@ -75,17 +75,17 @@
                     android:layout_height="wrap_content"
                     android:text="canny" />
 
-                <Button
-                    android:id="@+id/histogram"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="直方图" />
+<!--                <Button-->
+<!--                    android:id="@+id/histogram"-->
+<!--                    android:layout_width="wrap_content"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:text="直方图" />-->
 
-                <Button
-                    android:id="@+id/histogram_equalization"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="直方图均衡" />
+<!--                <Button-->
+<!--                    android:id="@+id/histogram_equalization"-->
+<!--                    android:layout_width="wrap_content"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:text="直方图均衡" />-->
 
             </LinearLayout>
 
